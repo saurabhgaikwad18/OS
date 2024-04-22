@@ -1,0 +1,53 @@
+Q 1. Write a Stored Procedure namely proc_Grade for the categorization of student. If marks
+scored by students in examination is <=1500 and marks>=990 then student will be placed in
+distinction category if marks scored are between 989 and900 category is first class, if marks 899
+and 825 category is Higher Second Class.
+Write a PL/SQL block for using procedure created with above requirement.
+Stud_Marks(name, total_marks)
+Result(Roll,Name, Class
+
+CREATE TABLE Stud_Marks (
+  Roll NUMBER,
+  Name VARCHAR2(50),
+  total_marks NUMBER
+);
+
+CREATE TABLE Result (
+  Roll NUMBER,
+  Name VARCHAR2(50),
+  Class VARCHAR2(50)
+);
+
+INSERT INTO Stud_Marks (Roll, Name, total_marks) VALUES (1, 'Aman', 1000);
+INSERT INTO Stud_Marks (Roll, Name, total_marks) VALUES (2, 'Kartik', 950);
+INSERT INTO Stud_Marks (Roll, Name, total_marks) VALUES (3, 'Darshan', 850);
+
+INSERT INTO Result (Roll, Name) VALUES (1, 'Aman');
+INSERT INTO Result (Roll, Name) VALUES (2, 'Kartik');
+INSERT INTO Result (Roll, Name) VALUES (3, 'Darshan');
+
+CREATE OR REPLACE PROCEDURE proc_Grade(p_marks IN NUMBER, p_grade OUT VARCHAR2) AS
+BEGIN
+  IF p_marks <= 1500 AND p_marks >= 990 THEN
+    p_grade := 'Distinction';
+  ELSIF p_marks <= 989 AND p_marks >= 900 THEN
+    p_grade := 'First Class';
+  ELSIF p_marks <= 899 AND p_marks >= 825 THEN
+    p_grade := 'Higher Second Class';
+  ELSE
+    p_grade := 'No Category';
+  END IF;
+END proc_Grade;
+/
+
+DECLARE
+  v_grade VARCHAR2(20);
+BEGIN
+  FOR rec IN (SELECT * FROM Stud_Marks) LOOP
+    proc_Grade(rec.total_marks, v_grade);
+    UPDATE Result SET Class = v_grade WHERE Roll = rec.Roll;
+  END LOOP;
+  COMMIT;
+END;
+/
+select*from Result;

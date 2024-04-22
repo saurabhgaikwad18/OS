@@ -1,0 +1,85 @@
+-- Part (a)
+CREATE TABLE cust_mstr (
+    custno INT,
+    fname VARCHAR(50),
+    lname VARCHAR(50)
+);
+
+CREATE TABLE acc_fd_cust_dets (
+    codeno INT,
+    acc_fd_no INT
+);
+
+CREATE TABLE fd_dets (
+    fd_sr_no INT,
+    amt DECIMAL(10, 2)
+);
+
+INSERT INTO cust_mstr VALUES (1, 'Aman', 'Avthare');
+INSERT INTO cust_mstr VALUES (2, 'Sarthak', 'Nimje');
+INSERT INTO cust_mstr VALUES (3, 'Darshan', 'Patil');
+INSERT INTO cust_mstr VALUES (4, 'Kartik', 'Voda');
+
+INSERT INTO acc_fd_cust_dets VALUES (1, 1);
+INSERT INTO acc_fd_cust_dets VALUES (2, 2);
+INSERT INTO acc_fd_cust_dets VALUES (3, 3);
+INSERT INTO acc_fd_cust_dets VALUES (4, 4);
+
+INSERT INTO fd_dets VALUES (1, 5000.00);
+INSERT INTO fd_dets VALUES (2, 6000.00);
+INSERT INTO fd_dets VALUES (3, 7000.00);
+INSERT INTO fd_dets VALUES (4, 8000.00);
+
+-- Part (b)
+CREATE VIEW cust_acc_view AS
+SELECT c.fname, a.acc_fd_no
+FROM cust_mstr c
+JOIN acc_fd_cust_dets a ON c.custno = a.codeno;
+
+-- Insert operation on the base tables
+INSERT INTO cust_mstr (custno, fname, lname) VALUES (5, 'Aasha', 'Lastname');
+INSERT INTO acc_fd_cust_dets (codeno, acc_fd_no) VALUES (5, 5);
+
+-- Update operation on the base tables
+UPDATE cust_mstr SET fname = 'Katli' WHERE custno = 5;
+
+-- Delete operation on the base tables
+DELETE FROM acc_fd_cust_dets WHERE codeno = 5;
+DELETE FROM cust_mstr WHERE custno = 5;
+
+
+CREATE TABLE emp_mstr01 (
+    emp_no INT,
+    f_name VARCHAR(50),
+    l_name VARCHAR(50),
+    m_name VARCHAR(50),
+    dept VARCHAR(50)
+);
+
+CREATE TABLE cntc_dets01 (
+    code_no INT,
+    cntc_type VARCHAR(50),
+    cntc_data VARCHAR(50)
+);
+
+-- Insert data into the tables
+INSERT INTO emp_mstr01 VALUES (1, 'Aman', 'Avthare', 'M', 'Sales');
+INSERT INTO emp_mstr01 VALUES (2, 'Sarthak', 'Nimje', 'F', 'Marketing');
+INSERT INTO emp_mstr01 VALUES (3, 'Darshan', 'Patil', 'F', 'HR');
+INSERT INTO emp_mstr01 VALUES (4, 'Kartik', 'Voda', 'M', 'IT');
+
+INSERT INTO cntc_dets01 VALUES (1, 'Email', 'aman@gmail.com');
+INSERT INTO cntc_dets01 VALUES (2, 'Phone', '123-456-7890');
+INSERT INTO cntc_dets01 VALUES (3, 'Email', 'darshan@gmail.com');
+INSERT INTO cntc_dets01 VALUES (4, 'Phone', '098-765-4321');
+
+-- List the employee details along with contact details using left outer join
+SELECT e.*, c.cntc_type, c.cntc_data
+FROM emp_mstr01 e
+LEFT JOIN cntc_dets01 c ON e.emp_no = c.code_no;
+
+-- List the employee details along with contact details using right join
+SELECT e.*, c.cntc_type, c.cntc_data
+FROM cntc_dets01 c
+RIGHT JOIN emp_mstr01 e ON c.code_no = e.emp_no;
+

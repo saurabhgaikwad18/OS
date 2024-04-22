@@ -1,0 +1,77 @@
+CREATE TABLE Teachers (
+    Tname VARCHAR(255),
+    dno INT,
+    dname VARCHAR(255),
+    experience INT,
+    salary DECIMAL(10, 2),
+    date_of_joining DATE
+);
+
+-- Students(Sname,roll_no,class)
+CREATE TABLE Students (
+    Sname VARCHAR(255),
+    roll_no INT,
+    class VARCHAR(255)
+);
+
+-- Insert data into Teachers
+INSERT ALL
+INTO Teachers (Tname, dno, dname, experience, salary, date_of_joining) VALUES ('Praveen', 1, 'IT', 8, 12000, TO_DATE('2015-06-01', 'YYYY-MM-DD'))
+INTO Teachers (Tname, dno, dname, experience, salary, date_of_joining) VALUES ('Ravi', 2, 'COMP', 10, 15000, TO_DATE('2014-07-01', 'YYYY-MM-DD'))
+INTO Teachers (Tname, dno, dname, experience, salary, date_of_joining) VALUES ('Sunita', 3, 'E&TC', 12, 18000, TO_DATE('2013-08-01', 'YYYY-MM-DD'))
+INTO Teachers (Tname, dno, dname, experience, salary, date_of_joining) VALUES ('Amit', 4, 'COMP', 6, 9000, TO_DATE('2016-09-01', 'YYYY-MM-DD'))
+INTO Teachers (Tname, dno, dname, experience, salary, date_of_joining) VALUES ('Vijay', 5, 'IT', 7, 11000, TO_DATE('2015-10-01', 'YYYY-MM-DD'))
+SELECT * FROM dual;
+
+-- Insert data into Students
+INSERT ALL
+INTO Students (Sname, roll_no, class) VALUES ('Rahul', 1, '10th')
+INTO Students (Sname, roll_no, class) VALUES ('Priya', 2, '12th')
+INTO Students (Sname, roll_no, class) VALUES ('Ankit', 3, '11th')
+INTO Students (Sname, roll_no, class) VALUES ('Pooja', 4, '10th')
+INTO Students (Sname, roll_no, class) VALUES ('xyz', 5, '12th')
+SELECT * FROM dual;
+
+
+-- Q1. Find the information about all teachers
+SELECT * FROM Teachers;
+
+-- Q2. Find the information about all teachers of computer department
+SELECT * FROM Teachers WHERE dname = 'computer';
+
+-- Q3. Find the information about all teachers of computer, IT, and E&TC department
+SELECT * FROM Teachers WHERE dname IN ('computer', 'IT', 'E&TC');
+
+-- Q4. Find the information about all teachers of computer, IT, and E&TC department having salary greater than or equal to 10000/-
+SELECT * FROM Teachers WHERE dname IN ('computer', 'IT', 'E&TC') AND salary >= 10000;
+
+-- Q5. Find the student information having roll_no = 2 or Sname=xyz
+SELECT * FROM Students WHERE roll_no = 2 OR Sname = 'xyz';
+
+-- Q6. Update the experience of teacher-praveen to 10 years, if the entry is not available in database consider the entry as new entry.
+INSERT INTO Teachers (Tname, experience)
+VALUES ('praveen', 10)
+ON DUPLICATE KEY UPDATE experience=10;
+
+-- Q7. Update the department of all the teachers working in IT department to COMP
+UPDATE Teachers SET dname = 'COMP' WHERE dname = 'IT';
+
+-- Q8. Find the teachers name and their experience from teachers collection
+SELECT Tname, experience FROM Teachers;
+
+-- Q9. Using Save() method insert one entry in department collection
+-- Create Department table
+CREATE TABLE Department (
+    dname VARCHAR(255)
+);
+
+INSERT INTO Department (dname) VALUES ('IT');
+
+-- Q10. Using Save() method change the dept of teacher praveen to IT
+UPDATE Teachers SET dname = 'IT' WHERE Tname = 'praveen';
+
+-- Q11. Delete all the documents from teachers collection having IT dept.
+DELETE FROM Teachers WHERE dname = 'IT';
+
+-- Q12. Display with pretty() method, the first 3 documents in teachers collection in ascending order.
+SELECT * FROM Teachers ORDER BY Tname ASC LIMIT 3;

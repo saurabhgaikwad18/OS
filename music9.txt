@@ -1,0 +1,57 @@
+Q 1. Write PL/SQL block using explicit cursor for following requirements:
+College has decided to mark all those students detained (D) who are having attendance less than
+75%.
+Whenever such update takes place, a record for the same is maintained in the D_Stud table.
+create table stud21(roll number(4), att number(4), status varchar(1));
+create table d_stud(roll number(4), att number(4));
+
+
+CREATE TABLE stud21(
+    roll NUMBER(4),
+    att NUMBER(4),
+    status VARCHAR(1)
+);
+
+CREATE TABLE d_stud(
+    roll NUMBER(4),
+    att NUMBER(4)
+);
+
+INSERT INTO stud21 (roll, att, status) VALUES (1, 80, 'P');
+INSERT INTO stud21 (roll, att, status) VALUES (2, 70, 'P');
+INSERT INTO stud21 (roll, att, status) VALUES (3, 85, 'P');
+INSERT INTO stud21 (roll, att, status) VALUES (4, 65, 'P');
+
+DECLARE
+    CURSOR c_stud IS
+        SELECT roll, att
+        FROM stud21
+        WHERE att < 75;
+    r_stud c_stud%ROWTYPE;
+BEGIN
+    OPEN c_stud;
+    LOOP
+        FETCH c_stud INTO r_stud;
+        EXIT WHEN c_stud%NOTFOUND;
+        
+        -- Update the status in stud21 table
+        UPDATE stud21
+        SET status = 'D'
+        WHERE roll = r_stud.roll;
+        
+        -- Insert into d_stud table
+        INSERT INTO d_stud (roll, att)
+        VALUES (r_stud.roll, r_stud.att);
+    END LOOP;
+    CLOSE c_stud;
+    
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+SELECT * FROM stud21;
+SELECT * FROM d_stud;

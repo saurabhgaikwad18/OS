@@ -1,0 +1,46 @@
+Write Pl/SQL code block that will accept account number from user , check if the users balance is less than
+the minimum balance , only deduct Rs.100/- from the balance .
+
+
+CREATE TABLE accounts (
+  account_number NUMBER PRIMARY KEY,
+  balance NUMBER
+);
+
+INSERT INTO accounts (account_number, balance) VALUES (1, 1000);
+INSERT INTO accounts (account_number, balance) VALUES (2, 400);
+INSERT INTO accounts (account_number, balance) VALUES (3, 600);
+COMMIT;
+
+CREATE OR REPLACE PROCEDURE update_balance(
+    p_account_number IN NUMBER
+) AS
+    v_balance NUMBER;
+    v_minimum_balance NUMBER := 100; -- Minimum balance threshold
+BEGIN
+    -- Retrieve balance for the provided account number
+    SELECT balance INTO v_balance
+    FROM accounts
+    WHERE account_number = p_account_number;
+
+    -- Check if the balance is less than the minimum balance
+    IF v_balance < v_minimum_balance THEN
+        -- Deduct Rs. 100 from the balance
+        UPDATE accounts
+        SET balance = balance - 100
+        WHERE account_number = p_account_number;
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Rs. 100 deducted from the account balance.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Balance is above the minimum threshold. No deduction needed.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Account number not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+EXECUTE update_balance(&account_number);

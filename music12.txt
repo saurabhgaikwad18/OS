@@ -1,0 +1,112 @@
+Q 1. Write an SQL code block these raise a user defined exception where business rule is voilated.
+BR for client_master table specifies when the value of bal_due field is less than 0 handle the
+exception.
+
+CREATE TABLE client_master (
+    id NUMBER PRIMARY KEY,
+    bal_due NUMBER
+);
+
+INSERT INTO client_master (id, bal_due) VALUES (1, 100);
+INSERT INTO client_master (id, bal_due) VALUES (2, -50);
+
+
+
+
+DECLARE
+    bal_due_exception EXCEPTION;
+BEGIN
+    FOR i IN (SELECT * FROM client_master)
+    LOOP
+        IF i.bal_due < 0 THEN
+            RAISE bal_due_exception;
+        END IF;
+    END LOOP;
+EXCEPTION
+    WHEN bal_due_exception THEN
+        dbms_output.put_line('Business rule violated: bal_due field is less than 0');
+END;
+
+-- Insert a record with bal_due less than 0
+INSERT INTO client_master (id, bal_due) VALUES (3, -100);
+
+-- Run the procedure
+DECLARE
+    bal_due_exception EXCEPTION;
+BEGIN
+    FOR i IN (SELECT * FROM client_master)
+    LOOP
+        IF i.bal_due < 0 THEN
+            RAISE bal_due_exception;
+        END IF;
+    END LOOP;
+EXCEPTION
+    WHEN bal_due_exception THEN
+        dbms_output.put_line('Business rule violated: bal_due field is less than 0');
+END;
+
+
+
+DESCRIBE client_master;
+
+
+
+
+Q 2.Write a before trigger for Insert, update event considering following requirement
+
+-- Create Emp table
+CREATE TABLE Emp (
+    e_no NUMBER PRIMARY KEY,
+    e_name VARCHAR2(100),
+    salary NUMBER
+);
+
+-- Create Tracking table
+CREATE TABLE Tracking (
+    e_no NUMBER,
+    salary NUMBER
+);
+
+-- Insert some sample data into the Emp table
+INSERT INTO Emp (e_no, e_name, salary) VALUES (1, 'John Doe', 60000);
+INSERT INTO Emp (e_no, e_name, salary) VALUES (2, 'Jane Smith', 45000);
+INSERT INTO Emp (e_no, e_name, salary) VALUES (3, 'Michael Johnson', 55000);
+
+-- Create BEFORE INSERT trigger
+CREATE OR REPLACE TRIGGER before_insert_emp
+BEFORE INSERT ON Emp
+FOR EACH ROW
+BEGIN
+    IF :NEW.salary < 50000 THEN
+        -- Insert rejected salary into Tracking table
+        INSERT INTO Tracking (e_no, salary) VALUES (:NEW.e_no, :NEW.salary);
+        -- Raise application error to reject insert operation
+        RAISE_APPLICATION_ERROR(-20001, 'Salary cannot be less than Rs. 50,000/-');
+    END IF;
+END;
+/
+
+-- Create BEFORE UPDATE trigger
+CREATE OR REPLACE TRIGGER before_update_emp
+BEFORE UPDATE ON Emp
+FOR EACH ROW
+BEGIN
+    IF :NEW.salary < 50000 THEN
+        -- Insert rejected salary into Tracking table
+        INSERT INTO Tracking (e_no, salary) VALUES (:NEW.e_no, :NEW.salary);
+        -- Raise application error to reject update operation
+        RAISE_APPLICATION_ERROR(-20002, 'Salary cannot be updated to less than Rs. 50,000/-');
+    END IF;
+END;
+/
+
+-- Attempt to insert a record with salary less than Rs. 50,000/-
+INSERT INTO Emp (e_no, e_name, salary) VALUES (4, 'Alice', 40000);
+
+-- Attempt to update a record to set salary less than Rs. 50,000/-
+UPDATE Emp SET salary = 45000 WHERE e_no = 1;
+
+-- Verify that rejected records are stored in the Tracking table
+SELECT * FROM Tracking;
+
+

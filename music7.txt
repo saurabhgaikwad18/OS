@@ -1,0 +1,88 @@
+Q 1. Write an SQL code block these raise a user defined exception where business rule is voilated.
+BR for client_master table specifies when the value of bal_due field is less than 0 handle the
+exception.
+
+CREATE TABLE client_master (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    bal_due DECIMAL(10, 2)
+);
+
+INSERT INTO client_master (id, name, bal_due) VALUES (1, 'Client1', 100.00);
+INSERT INTO client_master (id, name, bal_due) VALUES (2, 'Client2', -50.00);
+INSERT INTO client_master (id, name, bal_due) VALUES (3, 'Client3', 200.00);
+
+CREATE OR REPLACE PROCEDURE check_bal_due AS
+    bal_due_less_than_zero EXCEPTION;
+    _record client_master%ROWTYPE;
+BEGIN
+    FOR _record IN (SELECT * FROM client_master) LOOP
+        IF _record.bal_due < 0 THEN
+            RAISE bal_due_less_than_zero;
+        END IF;
+    END LOOP;
+EXCEPTION
+    WHEN bal_due_less_than_zero THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Business rule violation: bal_due cannot be less than 0');
+END;
+/
+
+
+BEGIN
+   check_bal_due();
+END;
+/
+
+
+
+Q 2. Organization has decided to increase the salary of employees by 10% of existing salary, who
+are having salary less than average salary of organization, Whenever such salary updates takes
+place, a record for the same is maintained in the increment_salary table.
+
+
+-- Create the EMP table
+CREATE TABLE EMP (
+  E_no NUMBER(10) PRIMARY KEY,
+  Salary NUMBER(10, 2)
+);
+
+-- Create the increment_salary table
+CREATE TABLE increment_salary (
+  E_no NUMBER(10),
+  Salary NUMBER(10, 2),
+  FOREIGN KEY (E_no) REFERENCES EMP(E_no)
+);
+
+-- Insert data into the EMP table
+INSERT INTO EMP (E_no, Salary) VALUES (1, 50000);
+INSERT INTO EMP (E_no, Salary) VALUES (2, 60000);
+INSERT INTO EMP (E_no, Salary) VALUES (3, 70000);
+
+-- Commit the transaction
+COMMIT;
+
+-- Calculate the average salary
+DECLARE
+  avg_sal NUMBER;
+BEGIN
+  SELECT AVG(Salary) INTO avg_sal FROM EMP;
+
+  -- Increase the salary by 10% for employees earning less than the average salary
+  FOR emp_rec IN (SELECT * FROM EMP WHERE Salary < avg_sal) LOOP
+    UPDATE EMP
+    SET Salary = emp_rec.Salary * 1.1
+    WHERE E_no = emp_rec.E_no;
+
+    -- Insert a record into the increment_salary table
+    INSERT INTO increment_salary(E_no, Salary)
+    VALUES (emp_rec.E_no, emp_rec.Salary * 1.1);
+  END LOOP;
+
+  -- Commit the transaction
+  COMMIT;
+END;
+/
+
+SELECT * FROM EMP;
+SELECT * FROM increment_salary;
+

@@ -1,0 +1,91 @@
+Q 1.Consider table Stud(Roll, Att,Status) 
+Write a PL/SQL block for following requirement and handle the exceptions.
+Roll no. of student will be entered by user. Attendance of roll no. entered by user will be checked in
+Stud table. If attendance is less than 75% then display the message “Term not granted” and set the
+status in stud table as “D”. Otherwise display message “Term granted” and set the status in stud
+table as “ND”.
+
+CREATE TABLE Stud (
+  Roll NUMBER(5),
+  Att NUMBER(5, 2),
+  Status CHAR(2)
+);
+
+INSERT INTO Stud (Roll, Att, Status) VALUES (1, 80, NULL);
+INSERT INTO Stud (Roll, Att, Status) VALUES (2, 70, NULL);
+
+DECLARE
+  v_roll Stud.Roll%TYPE;
+  v_att Stud.Att%TYPE;
+  
+BEGIN
+  -- Roll number entered by user
+  v_roll := &user_input;
+
+  -- Fetch attendance of the student
+  SELECT Att INTO v_att FROM Stud WHERE Roll = v_roll;
+
+  -- Check if attendance is less than 75%
+  IF v_att < 75 THEN
+    DBMS_OUTPUT.PUT_LINE('Term not granted');
+    UPDATE Stud SET Status = 'D' WHERE Roll = v_roll;
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Term granted');
+    UPDATE Stud SET Status = 'ND' WHERE Roll = v_roll;
+  END IF;
+
+  -- Save the changes
+  COMMIT;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('No data found for the entered roll number');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END;
+/
+
+
+Q 2.The bank manager has decided to activate all those accounts which were previously marked as
+inactive for performing no transaction in last 365 days. Write a PL/SQ block (using implicit cursor)
+to update the status of account, display an approximate message based on the no. of rows affected
+by the update. (Use of %FOUND, %NOTFOUND, %ROWCOUNT)
+
+CREATE TABLE bank_accounts (
+    account_id NUMBER,
+    last_transaction_date DATE,
+    status VARCHAR2(50)
+);
+
+-- Inserting some data
+INSERT INTO bank_accounts VALUES (1, SYSDATE - 400, 'inactive');
+INSERT INTO bank_accounts VALUES (2, SYSDATE - 300, 'inactive');
+INSERT INTO bank_accounts VALUES (3, SYSDATE - 200, 'active');
+COMMIT;
+
+DECLARE
+    rows_updated NUMBER;
+BEGIN
+    UPDATE bank_accounts
+    SET status = 'active'
+    WHERE last_transaction_date <= SYSDATE - 365
+    AND status = 'inactive';
+
+    rows_updated := SQL%ROWCOUNT;
+
+    IF SQL%FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Accounts updated: ' || rows_updated);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No inactive accounts found.');
+    END IF;
+    
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
+
+
+
+

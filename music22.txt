@@ -1,0 +1,57 @@
+Problem statements 22
+A stored function is created to perform the ACCOUNT_NO check operation .F_checkAccNO() is
+the name of function which accept a variable ACCOUNT_NO and returns the value to host
+environment The value changes from 0(if ACCOUNT_NO does not exist) to 1(if ACCOUNT_NO
+exist) depending on the records retrieved.
+
+
+CREATE TABLE ACCOUNTS (
+  ACCOUNT_NO NUMBER PRIMARY KEY,
+  ACCOUNT_NAME VARCHAR2(100),
+  BALANCE NUMBER
+);
+
+
+INSERT INTO ACCOUNTS (ACCOUNT_NO, ACCOUNT_NAME, BALANCE)
+VALUES (1, 'John Doe', 5000);
+
+
+CREATE OR REPLACE FUNCTION F_checkAccNO(p_account_no IN ACCOUNTS.ACCOUNT_NO%TYPE)
+RETURN NUMBER IS
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*)
+  INTO v_count
+  FROM ACCOUNTS
+  WHERE ACCOUNT_NO = p_account_no;
+
+  IF v_count = 0 THEN
+    RETURN 0; -- ACCOUNT_NO does not exist
+  ELSE
+    RETURN 1; -- ACCOUNT_NO exists
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+    RETURN NULL;
+END;
+/
+
+
+DECLARE
+  v_exists NUMBER;
+BEGIN
+  v_exists := F_checkAccNO(1); -- replace 1 with the ACCOUNT_NO you want to check
+
+  IF v_exists = 1 THEN
+    DBMS_OUTPUT.PUT_LINE('ACCOUNT_NO exists.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('ACCOUNT_NO does not exist.');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+

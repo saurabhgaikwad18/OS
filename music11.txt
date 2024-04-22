@@ -1,0 +1,89 @@
+Q 1. Write a stored function in PL/SQL for given requirement and use the same in PL/SQL block.
+Account no. and branch name will be accepted from user. The same will be searched in table
+acct_details. If status of account is active then display appropriate message and also store the
+account details in active_acc_details table, otherwise display message on screen “account is
+inactive”
+
+-- Table to store account details
+CREATE TABLE acct_details (
+    account_no NUMBER,
+    branch_name VARCHAR2(100),
+    status VARCHAR2(10)
+);
+
+-- Table to store active account details
+CREATE TABLE active_acc_details (
+    account_no NUMBER,
+    branch_name VARCHAR2(100)
+);
+
+
+-- Insert sample data into acct_details table
+INSERT INTO acct_details (account_no, branch_name, status)
+VALUES (1001, 'Branch A', 'active');
+
+INSERT INTO acct_details (account_no, branch_name, status)
+VALUES (1002, 'Branch B', 'inactive');
+
+INSERT INTO acct_details (account_no, branch_name, status)
+VALUES (1003, 'Branch C', 'active');
+
+
+CREATE OR REPLACE FUNCTION check_account_status(
+    p_account_no IN NUMBER,
+    p_branch_name IN VARCHAR2
+) RETURN VARCHAR2 IS
+    v_status VARCHAR2(10);
+BEGIN
+    -- Retrieve account status from acct_details table
+    SELECT status
+    INTO v_status
+    FROM acct_details
+    WHERE account_no = p_account_no
+    AND branch_name = p_branch_name;
+
+    IF v_status = 'active' THEN
+        -- Insert account details into active_acc_details table
+        INSERT INTO active_acc_details (account_no, branch_name)
+        VALUES (p_account_no, p_branch_name);
+
+        RETURN 'Account is active';
+    ELSE
+        RETURN 'Account is inactive';
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Account not found';
+END;
+/
+
+
+CREATE OR REPLACE FUNCTION check_account_status(
+    p_account_no IN NUMBER,
+    p_branch_name IN VARCHAR2
+) RETURN VARCHAR2 IS
+    v_status VARCHAR2(10);
+BEGIN
+    -- Retrieve account status from acct_details table
+    SELECT status
+    INTO v_status
+    FROM acct_details
+    WHERE account_no = p_account_no
+    AND branch_name = p_branch_name;
+
+    IF v_status = 'active' THEN
+        -- Insert account details into active_acc_details table
+        INSERT INTO active_acc_details (account_no, branch_name)
+        VALUES (p_account_no, p_branch_name);
+
+        RETURN 'Account is active';
+    ELSE
+        RETURN 'Account is inactive';
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Account not found';
+END;
+/
+
+
